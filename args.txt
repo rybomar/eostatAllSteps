@@ -1,0 +1,10 @@
+2
+"N:\GUS\EFA\trening\test3\lpis_2020_test3_p2.shp"
+class
+ozime,jare,rzepak,plantacje,warzywa,rozne,TUZ,zagajniki
+H:\eostat\code\eostatAllSteps\testDir\workingDir
+N:\GUS_2020
+H:\eostat\S1S2\resultsm2\mosaic
+"H:\eostat\2020\segments\segments_P2.v1_res_ext_uint.tif"
+AllS1,AllS2
+overwrite=false
