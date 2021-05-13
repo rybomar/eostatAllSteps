@@ -1,5 +1,6 @@
-from pathlib import Path
+from ClassificationProcess import ClassificationProcess
 from Configuration import Configuration
+from Configuration import ConfigurationArgs
 from StatsCreator import StatsCreator
 
 
@@ -21,12 +22,22 @@ def prepareS2Stats(conf: Configuration):
 
 if __name__ == '__main__':
     args = 'args.txt'
+    args = 'configurationArgsFilled.json'
+    configArgs = ConfigurationArgs()
+    configArgs.saveJSON('configurationEmpty.json')
     config = loadConfiguration(args)
-    if Path(config.S1ProcessedDir).is_dir():
-        prepareS1Stats(config)
-    else:
-        print('S1ProcessedDir does not exist, skipping it')
-    if Path(config.S2ProcessedDir).is_dir():
-        prepareS2Stats(config)
-    else:
-        print('S2ProcessedDir does not exist, skipping it')
+
+    statsCreator = StatsCreator(config)
+    statsCreator.doAllSteps()
+    cl = ClassificationProcess(config)
+    cl.prepareTraining()
+    cl.doClassificationForAllObjects()
+
+    # if Path(config.S1ProcessedDir).is_dir():
+    #     prepareS1Stats(config)
+    # else:
+    #     print('S1ProcessedDir does not exist, skipping it')
+    # if Path(config.S2ProcessedDir).is_dir():
+    #     prepareS2Stats(config)
+    # else:
+    #     print('S2ProcessedDir does not exist, skipping it')

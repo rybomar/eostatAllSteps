@@ -1,0 +1,17 @@
+{
+    "S1DataMainDir": "",
+    "S2DataMainDir": "",
+    "classesToClassify": [],
+    "optionClassifierMaxDepth": 100,
+    "optionClassifierNEstimators": 10000,
+    "optionNJobs": 4,
+    "optionStratificationCounts": [],
+    "optionTestName": "",
+    "options": [],
+    "orbitNumber": 0,
+    "overwrite": true,
+    "segmentationRasterFile": "",
+    "trainingColumnInShapefile": "",
+    "trainingPointsShapefile": "",
+    "workingDir": ""
+}

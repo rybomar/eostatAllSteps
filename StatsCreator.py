@@ -5,50 +5,55 @@ from osgeo import gdal
 from osgeo import ogr
 from Configuration import Configuration
 
+
 class StatsCreator:
     def __init__(self, conf: Configuration):
         self.outputCommandsFilePath = ''
         self.outputCommandsFileHandle = 0
         self.conf = conf
         self.statsDir = conf.statsDir
-        self.trainingPointsShapefile = conf.trainingPointsShapefile
-        self.segmentationTiffFile = conf.segmentationTiffFile
-        self.workingTrainingPointsShapefile = Path(self.statsDir, 'trainingShp.shp')
-        self.workingRasterTrainingPoints = Path(self.statsDir, 'segmentsPointsSelected.tif')
-        self.outputCommandsFilePath = Path(self.conf.workingDir, 'commands.txt')
+        self.trainingPointsShapefile = conf.fWorkingTrainingPointsShapefile
+        self.segmentationTiffFile = conf.confArgs.segmentationRasterFile
+        self.workingTrainingPointsShapefile = conf.fWorkingTrainingPointsShapefile
+        self.workingRasterSegmentation = conf.fWorkingRasterSegmentation
+        self.workingRasterTrainingPoints = conf.fWorkingRasterTrainingPoints
+        self.outputCommandsFilePath = conf.fOutputCommandsFilePath
         self.outputCommandsFileHandle = open(self.outputCommandsFilePath, "w")
-        self.binCoordFilePath = Path(self.statsDir, 'allCoords.bin')
-        self.binRefCoordFilePath = Path(self.statsDir, 'RefCoordsSelected.bin')
-        self.binAllStatsS1FilePath = Path(self.statsDir, 'allStatsS1.bin')
-        self.binRefStatsS1FilePath = Path(self.statsDir, 'refStatsS1.bin')
-        self.csvRefStatsS1FilePath = Path(self.statsDir, 'refStatsS1.csv')
-        self.binAllStatsS2FilePath = Path(self.statsDir, 'allStatsS2.bin')
-        self.binRefStatsS2FilePath = Path(self.statsDir, 'refStatsS2.bin')
-        self.csvRefStatsS2FilePath = Path(self.statsDir, 'refStatsS2.csv')
+        self.binCoordFilePath = conf.fBinCoordFilePath
+        self.binRefCoordFilePath = conf.fBinRefCoordFilePath
+        self.binAllStatsS1FilePath = conf.fBinAllStatsS1FilePath
+        self.binRefStatsS1FilePath = conf.fBinRefStatsS1FilePath
+        self.csvRefStatsS1FilePath = conf.fCsvRefStatsS1FilePath
+        self.binAllStatsS2FilePath = conf.fBinAllStatsS2FilePath
+        self.binRefStatsS2FilePath = conf.fBinRefStatsS2FilePath
+        self.csvRefStatsS2FilePath = conf.fCsvRefStatsS2FilePath
+
+    def doAllStatsSteps(self):
+        a = 3
 
     def copyShapefiles(self):
-        sourceDirectory = Path(self.trainingPointsShapefile).parent.absolute()
-        fileNameWithoutExt = Path(self.trainingPointsShapefile).stem
+        sourceDirectory = Path(self.conf.confArgs.trainingPointsShapefile).parent.absolute()
+        fileNameWithoutExt = Path(self.conf.confArgs.trainingPointsShapefile).stem
         src = Path(sourceDirectory)
         filename = fileNameWithoutExt
         dst = Path(self.statsDir)
+        shpNameFile = 'trainingShp'
+        self.trainingPointsShapefile = Path(dst, shpNameFile + '.shp')
         idx = 0
         for file in src.iterdir():
             if file.is_file() and file.stem == filename:
                 idx += 1
-                copy(file, (dst / f"trainingShp").with_suffix(file.suffix))
+                copy(file, (dst / shpNameFile).with_suffix(file.suffix))
 
     def copySegmentationFile(self):
-        destFile = Path(self.statsDir, 'segmentsPolygons.tif')
-        destPointsFile = self.workingRasterTrainingPoints
-        copy(self.segmentationTiffFile, destFile)
-        # copy(self.segmentationTiffFile, destPointsFile)
+        if not Path(self.workingRasterTrainingPoints).exists() or self.conf.confArgs.overwrite:
+            copy(self.segmentationTiffFile, self.workingRasterSegmentation)
+            # copy(self.segmentationTiffFile, self.workingRasterTrainingPoints)
 
     def drawPoints(self):
-        dataSrc = gdal.Open(self.segmentationTiffFile)
-        shp = ogr.Open(str(self.workingTrainingPointsShapefile))
-        lyr = shp.GetLayer()
-        feature = lyr.GetNextFeature()
+        if self.workingRasterTrainingPoints.exists() and self.workingRasterTrainingPoints.stat().st_size > 1024 and not self.conf.confArgs.overwrite:
+            return
+        dataSrc = gdal.Open(str(self.workingRasterSegmentation))
 
         driver = gdal.GetDriverByName('GTiff')
         dst_ds = driver.Create(
@@ -61,12 +66,12 @@ class StatsCreator:
         dst_ds.SetGeoTransform(dataSrc.GetGeoTransform())
         dst_ds.SetProjection(dataSrc.GetProjection())
         i = 0
-        for c in self.conf.classesList:
-            whereCond = '"' + self.conf.trainingClassesColumnName + '"=\'' + self.conf.classesList[i] + '\''
-            OPTIONS = gdal.RasterizeOptions(burnValues=[i+1], where=whereCond)
+        for c in self.conf.confArgs.classesToClassify:
+            whereCond = '"' + self.conf.confArgs.trainingColumnInShapefile + '"=\'' + self.conf.confArgs.classesToClassify[i] + '\''
+            OPTIONS = gdal.RasterizeOptions(burnValues=[i + 1], where=whereCond)
             print('rasterize:' + whereCond)
             gdal.Rasterize(dst_ds, str(self.workingTrainingPointsShapefile), options=OPTIONS)
-            i = i+1
+            i = i + 1
 
     def runSystemProcess(self, command):
         if not self.outputCommandsFileHandle.closed:
@@ -77,12 +82,12 @@ class StatsCreator:
 
     def runCoord(self):
         command = self.conf.prepareProgramExePath
-        command = command + ' coord ' + str(self.conf.segmentationTiffFile) + ' ' + str(self.binCoordFilePath)
+        command = command + ' coord ' + str(self.conf.segmentationRasterFile) + ' ' + str(self.binCoordFilePath)
         self.runSystemProcess(command)
 
     def runCoordRef(self):
         command = self.conf.prepareProgramExePath
-        command = command + ' coordRef ' + str(self.conf.segmentationTiffFile) + ' ' + str(self.workingRasterTrainingPoints) + ' ' + str(self.binRefCoordFilePath)
+        command = command + ' coordRef ' + str(self.conf.segmentationRasterFile) + ' ' + str(self.workingRasterTrainingPoints) + ' ' + str(self.binRefCoordFilePath)
         self.runSystemProcess(command)
 
     def dirListToStr(self, list):
@@ -119,7 +124,7 @@ class StatsCreator:
         command = command + self.dirListToStr(dirList)
         self.runSystemProcess(command)
 
-    def doAllS1Steps(self):
+    def doPrepareSteps(self):
         self.copyShapefiles()
         self.copySegmentationFile()
         self.drawPoints()
@@ -127,45 +132,47 @@ class StatsCreator:
             self.runCoordRef()
         if self.conf.overwrite or not self.binCoordFilePath.is_file():
             self.runCoord()
-        if self.conf.RefS1:
-            if self.conf.overwrite or not self.binRefStatsS1FilePath.is_file():
-                self.runLoadMultiTempRefS1()
-        if self.conf.AllS1:
-            if self.conf.overwrite or not self.binAllStatsS1FilePath.is_file():
-                self.runLoadMultiTempS1()
+
+
+    def doAllS1Steps(self):
+        if Path(self.conf.confArgs.S1DataMainDir).is_dir():
+            self.doPrepareSteps()
+            if self.conf.RefS1:
+                if self.conf.overwrite or not self.binRefStatsS1FilePath.is_file():
+                    self.runLoadMultiTempRefS1()
+            if self.conf.AllS1:
+                if self.conf.overwrite or not self.binAllStatsS1FilePath.is_file():
+                    self.runLoadMultiTempS1()
 
     def doAllS2Steps(self):
-        self.copyShapefiles()
-        self.copySegmentationFile()
-        self.drawPoints()
-        if self.conf.overwrite or not self.binRefCoordFilePath.is_file():
-            self.runCoordRef()
-        if self.conf.overwrite or not self.binCoordFilePath.is_file():
-            self.runCoord()
-        if self.conf.RefS2:
-            if self.conf.overwrite or not self.binRefStatsS2FilePath.is_file():
-                self.runLoadMultiTempRefS2()
-        if self.conf.AllS2:
-            if self.conf.overwrite or not self.binAllStatsS2FilePath.is_file():
-                self.runLoadMultiTempS2()
+        if Path(self.conf.confArgs.S2DataMainDir).is_dir():
+            self.doPrepareSteps()
+            if self.conf.RefS2:
+                if self.conf.overwrite or not self.binRefStatsS2FilePath.is_file():
+                    self.runLoadMultiTempRefS2()
+            if self.conf.AllS2:
+                if self.conf.overwrite or not self.binAllStatsS2FilePath.is_file():
+                    self.runLoadMultiTempS2()
 
     def doAllSteps(self):
-        self.copyShapefiles()
-        self.copySegmentationFile()
-        self.drawPoints()
-        if self.conf.overwrite or not self.binRefCoordFilePath.is_file():
-            self.runCoordRef()
-        if self.conf.overwrite or not self.binCoordFilePath.is_file():
-            self.runCoord()
-        if self.conf.RefS1:
-            if self.conf.overwrite or not self.binRefStatsS1FilePath.is_file():
-                self.runLoadMultiTempRefS1()
-        if self.conf.AllS1:
-            if self.conf.overwrite or not self.binAllStatsS1FilePath.is_file():
-                self.runLoadMultiTempS1()
-        if self.conf.RefS2:
-            if self.conf.overwrite or not self.binRefStatsS2FilePath.is_file():
-                self.runLoadMultiTempRefS2()
-        if self.conf.AllS2:
-            if self.conf.overwrite or not self.binAllStatsS2FilePath.is_file():
-                self.runLoadMultiTempS2()
+        self.doAllS1Steps()
+        self.doAllS2Steps()
+        # self.copyShapefiles()
+        # self.copySegmentationFile()
+        # self.drawPoints()
+        # if self.conf.overwrite or not self.binRefCoordFilePath.is_file():
+        #     self.runCoordRef()
+        # if self.conf.overwrite or not self.binCoordFilePath.is_file():
+        #     self.runCoord()
+        # if self.conf.RefS1:
+        #     if self.conf.overwrite or not self.binRefStatsS1FilePath.is_file():
+        #         self.runLoadMultiTempRefS1()
+        # if self.conf.AllS1:
+        #     if self.conf.overwrite or not self.binAllStatsS1FilePath.is_file():
+        #         self.runLoadMultiTempS1()
+        # if self.conf.RefS2:
+        #     if self.conf.overwrite or not self.binRefStatsS2FilePath.is_file():
+        #         self.runLoadMultiTempRefS2()
+        # if self.conf.AllS2:
+        #     if self.conf.overwrite or not self.binAllStatsS2FilePath.is_file():
+        #         self.runLoadMultiTempS2()
