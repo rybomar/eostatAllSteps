@@ -25,7 +25,7 @@ class IterativeFeatureReduction:
         self.referenceData = []
         self.indexesOfSelectedFeatures = []
         self.cutFeaturePercentInIteration = 0.05
-        self.minFeaturesCount = 20
+        self.minFeaturesCount = 80
         self.foldCut = 0.2
         self.resultsSaveDirectory = conf.statsDir
 

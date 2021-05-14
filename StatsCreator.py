@@ -18,7 +18,7 @@ class StatsCreator:
         self.workingRasterSegmentation = conf.fWorkingRasterSegmentation
         self.workingRasterTrainingPoints = conf.fWorkingRasterTrainingPoints
         self.outputCommandsFilePath = conf.fOutputCommandsFilePath
-        self.outputCommandsFileHandle = open(self.outputCommandsFilePath, "w")
+        # self.outputCommandsFileHandle = open(self.outputCommandsFilePath, "w")
         self.binCoordFilePath = conf.fBinCoordFilePath
         self.binRefCoordFilePath = conf.fBinRefCoordFilePath
         self.binAllStatsS1FilePath = conf.fBinAllStatsS1FilePath
@@ -74,9 +74,9 @@ class StatsCreator:
             i = i + 1
 
     def runSystemProcess(self, command):
-        if not self.outputCommandsFileHandle.closed:
-            self.outputCommandsFileHandle.write(command)
-            self.outputCommandsFileHandle.write('\n')
+        # if not self.outputCommandsFileHandle.closed:
+        #     self.outputCommandsFileHandle.write(command)
+        #     self.outputCommandsFileHandle.write('\n')
         print('\n' + command)
         os.system(command)
 

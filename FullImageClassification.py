@@ -22,7 +22,7 @@ class FullImageClassification:
         self.statsDir = self.conf.statsDir
         self.resultsSaveDir = self.statsDir
         self.inputAllStatsS1FilePath = self.conf.fBinAllStatsS1FilePath
-        self.inputAllStatsS2FilePath = self.conf.fBinAllStatsS1FilePath
+        self.inputAllStatsS2FilePath = self.conf.fBinAllStatsS2FilePath
         self.binReader = StatsReader.StatsReader()
 
         if self.inputAllStatsS1FilePath.exists():
