@@ -16,7 +16,9 @@ joblib, numpy, sklearn, pathlib, json, shutil, osgeo (gdal, ogr), openpyxl
 ###Launching
 1. Prepare configuration file, e.g. `configurationFile.json`
 2. run:  
-`python main.py configurationFile.json`
+`python main.py`  
+   or  
+`python main.py otherConfigurationFile.json` - if  case of use configuration file in other location
    
 ###Preparing configuration file
 The easiest way to prepare the file is to open an example: `configurationArgsFilled.json` and edit some lines.  

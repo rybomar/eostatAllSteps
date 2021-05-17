@@ -24,7 +24,7 @@ def prepareS2Stats(conf: Configuration):
 
 
 def main(argv):
-    args = 'configurationArgsFilled.json'
+    args = 'configurationFile.json'
     if len(argv > 1):
         args = argv
     # configArgs = ConfigurationArgs()
