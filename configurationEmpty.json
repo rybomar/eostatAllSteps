@@ -6,7 +6,6 @@
     "optionClassifierNEstimators": 10000,
     "optionNJobs": 4,
     "optionStratificationCounts": [],
-    "optionTestName": "",
     "options": [],
     "orbitNumber": 0,
     "overwrite": true,

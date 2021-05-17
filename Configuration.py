@@ -17,7 +17,6 @@ class ConfigurationArgs:
         self.options = []#list with possible options AllS1, AllS2, RefS1, RefS2
         self.classesToClassify = []#list with strings (names of classes), eg. ['pszenica', 'burak']
         self.optionStratificationCounts = []#list with ints, corresponds to optionSelectedClasses
-        self.optionTestName = ''#if set, the result directory get gets name with this text
         #optionalClassifier:
         self.optionClassifierMaxDepth = 100
         self.optionClassifierNEstimators = 10000
