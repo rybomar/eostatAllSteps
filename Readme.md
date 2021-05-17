@@ -35,4 +35,3 @@ The meaning of each parameter in this file:
 - **"optionClassifierMaxDepth"** - random forest option,
 - **"optionClassifierNEstimators"** - random forest option,
 - **"optionNJobs"** - random forest option (number of threads)
-
