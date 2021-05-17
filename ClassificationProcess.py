@@ -63,7 +63,7 @@ class ClassificationProcess:
                   + ' ' + str(self.configuration.fBinCoordFilePath) \
                   + ' ' + str(self.configuration.fResultProbability256TxtFile) \
                   + ' ' + str(self.configuration.fResultProbabilityTifFile)
-        print("Classification: saving results to to file " + self.configuration.fResultClassesTifFile)
+        print("Classification: saving results to to file " + str(self.configuration.fResultClassesTifFile))
 
     def doClassificationForAllObjects(self):
         print("Classification: iterative training.")

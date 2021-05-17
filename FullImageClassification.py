@@ -1,7 +1,6 @@
 from Configuration import Configuration
 import joblib
 import StatsReader
-from pathlib import Path
 import FeaturesMangerS1S2
 import numpy as np
 

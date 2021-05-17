@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 from shutil import copy
 from osgeo import gdal
-from osgeo import ogr
 from Configuration import Configuration
 
 

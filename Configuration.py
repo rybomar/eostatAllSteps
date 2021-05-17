@@ -145,7 +145,7 @@ class Configuration:
                         requiredFilesFound = requiredFilesFound + 1
                 if requiredFilesFound == len(requiredFiles):
                     dir_list.append(x)
-        return dir_list[1:4]#todo: remove [1:4]
+        return dir_list#debug [1:4]
 
     def getS2TimesDirs(self):
         pdir = Path(self.confArgs.S2DataMainDir, 'P' + str(self.confArgs.orbitNumber), 'mozaika')
@@ -172,4 +172,4 @@ class Configuration:
                         requiredFilesFound = requiredFilesFound + 1
                 if requiredFilesFound == len(requiredFiles):
                     dir_list.append(x)
-        return dir_list[1:4]#todo: remove [1:4]
+        return dir_list#debug[1:4]
