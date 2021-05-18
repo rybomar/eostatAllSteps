@@ -2,7 +2,7 @@
     "S1DataMainDir": "N:\\GUS_2020",
     "S2DataMainDir": "",
     "classesToClassify": ["ozime", "jare"],
-    "optionStratificationCounts": [10, 10],
+    "optionStratificationCounts": [100, 100],
     "options": ["AllS1", "RefS1"],
     "orbitNumber": 2,
     "overwrite": false,

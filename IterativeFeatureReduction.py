@@ -150,7 +150,6 @@ class IterativeFeatureReduction:
 
     def saveErrorMatrix(self, errorMatrix):
         clNames = []
-        #todo: class names
         clNames = self.conf.confArgs.classesToClassify
 
         EMfilepath = self.conf.fMaxErrorMatrix
