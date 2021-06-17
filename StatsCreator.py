@@ -92,7 +92,7 @@ class StatsCreator:
         command = self.conf.prepareProgramExePath
         command = command + ' coordRef ' + str(self.conf.segmentationRasterFile) + ' ' + str(self.workingRasterTrainingPoints) + ' ' + str(self.binRefCoordFilePath)
         self.runSystemProcess(command)
-        self.conf.trySaveFileWithS3(self.binRefCoordFilePath)
+        self.conf.trySaveFileWithS3(self.binRefCoordFilcePath)
 
     def dirListToStr(self, list):
         strList = ''
