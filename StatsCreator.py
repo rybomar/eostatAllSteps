@@ -42,12 +42,14 @@ class StatsCreator:
         for file in src.iterdir():
             if file.is_file() and file.stem == filename:
                 idx += 1
-                copy(file, (dst / shpNameFile).with_suffix(file.suffix))
+                outFile = (dst / shpNameFile).with_suffix(file.suffix)
+                copy(file, outFile)
+                self.conf.trySaveFileWithS3(outFile)
 
     def copySegmentationFile(self):
         if not Path(self.workingRasterTrainingPoints).exists() or self.conf.confArgs.overwrite:
             copy(self.segmentationTiffFile, self.workingRasterSegmentation)
-            # copy(self.segmentationTiffFile, self.workingRasterTrainingPoints)
+            self.conf.trySaveFileWithS3(self.workingRasterSegmentation)
 
     def drawPoints(self):
         if self.workingRasterTrainingPoints.exists() and self.workingRasterTrainingPoints.stat().st_size > 1024 and not self.conf.confArgs.overwrite:
@@ -71,6 +73,7 @@ class StatsCreator:
             print('rasterize:' + whereCond)
             gdal.Rasterize(dst_ds, str(self.workingTrainingPointsShapefile), options=OPTIONS)
             i = i + 1
+        self.conf.trySaveFileWithS3(self.workingRasterTrainingPoints)
 
     def runSystemProcess(self, command):
         # if not self.outputCommandsFileHandle.closed:
@@ -83,11 +86,13 @@ class StatsCreator:
         command = self.conf.prepareProgramExePath
         command = command + ' coord ' + str(self.conf.segmentationRasterFile) + ' ' + str(self.binCoordFilePath)
         self.runSystemProcess(command)
+        self.conf.trySaveFileWithS3(self.binCoordFilePath)
 
     def runCoordRef(self):
         command = self.conf.prepareProgramExePath
         command = command + ' coordRef ' + str(self.conf.segmentationRasterFile) + ' ' + str(self.workingRasterTrainingPoints) + ' ' + str(self.binRefCoordFilePath)
         self.runSystemProcess(command)
+        self.conf.trySaveFileWithS3(self.binRefCoordFilePath)
 
     def dirListToStr(self, list):
         strList = ''
@@ -101,6 +106,8 @@ class StatsCreator:
         dirList = self.conf.getS1TimesDirs()
         command = command + self.dirListToStr(dirList)
         self.runSystemProcess(command)
+        self.conf.trySaveFileWithS3(self.binRefStatsS1FilePath)
+        self.conf.trySaveFileWithS3(self.csvRefStatsS1FilePath)
 
     def runLoadMultiTempS1(self):
         command = self.conf.prepareProgramExePath
@@ -108,6 +115,7 @@ class StatsCreator:
         dirList = self.conf.getS1TimesDirs()
         command = command + self.dirListToStr(dirList)
         self.runSystemProcess(command)
+        self.conf.trySaveFileWithS3(self.binAllStatsS1FilePath)
 
     def runLoadMultiTempS2(self):
         command = self.conf.prepareProgramExePath
@@ -122,6 +130,8 @@ class StatsCreator:
         dirList = self.conf.getS2TimesDirs()
         command = command + self.dirListToStr(dirList)
         self.runSystemProcess(command)
+        self.conf.trySaveFileWithS3(self.binRefStatsS1FilePath)
+        self.conf.trySaveFileWithS3(self.csvRefStatsS1FilePath)
 
     def doPrepareSteps(self):
         self.copyShapefiles()
@@ -131,7 +141,6 @@ class StatsCreator:
             self.runCoordRef()
         if self.conf.overwrite or not self.binCoordFilePath.is_file():
             self.runCoord()
-
 
     def doAllS1Steps(self):
         if Path(self.conf.confArgs.S1DataMainDir).is_dir():

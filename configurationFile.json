@@ -12,5 +12,10 @@
     "workingDir": "H:\\eostat\\code\\eostatAllSteps\\testDir\\workingDir\\allTest",
     "optionClassifierMaxDepth": 100,
     "optionClassifierNEstimators": 1000,
-    "optionNJobs": 6
+    "optionNJobs": 6,
+    "classificationName": "Test2020",
+    "s3AccessKey": "51c627dc77224444adb917ee1907a22d",
+    "s3SecretKey": "49414874058c4ec08e6ce5e2307c468f",
+    "s3Host": "https://cf2.cloudferro.com:8080",
+    "s3BucketName": "EostatTestBucket"
 }

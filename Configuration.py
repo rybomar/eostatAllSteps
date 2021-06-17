@@ -1,26 +1,31 @@
 import os.path
 from pathlib import Path
 import json
+from S3Connector import S3Connector
 
 
 class ConfigurationArgs:
     def __init__(self, jsonFile=''):
-        self.orbitNumber = 0#from 1 to 6 (for Poland from west to east)
-        self.trainingPointsShapefile = ''#path to .shp file
-        self.trainingColumnInShapefile = ''#column's name in .shp file with class names
-        self.workingDir = ''#path to directory to store temporary data
-        self.S1DataMainDir = ''#path where S1 data(prepared with MTSAR) are stored
-        self.S2DataMainDir = ''#path where S2 data(prepared with filled gaps) are stored
-        self.segmentationRasterFile = ''#path to raster file with segmentation (or parcels)
-        self.overwrite = True#boolean
-        #optional:
-        self.options = []#list with possible options AllS1, AllS2, RefS1, RefS2
-        self.classesToClassify = []#list with strings (names of classes), eg. ['pszenica', 'burak']
-        self.optionStratificationCounts = []#list with ints, corresponds to optionSelectedClasses
-        #optionalClassifier:
+        self.orbitNumber = 0  # from 1 to 6 (for Poland from west to east)
+        self.trainingPointsShapefile = ''  # path to .shp file
+        self.trainingColumnInShapefile = ''  # column's name in .shp file with class names
+        self.workingDir = ''  # path to directory to store temporary data
+        self.S1DataMainDir = ''  # path where S1 data(prepared with MTSAR) are stored
+        self.S2DataMainDir = ''  # path where S2 data(prepared with filled gaps) are stored
+        self.segmentationRasterFile = ''  # path to raster file with segmentation (or parcels)
+        self.overwrite = True  # boolean
+        # optional:
+        self.options = []  # list with possible options AllS1, AllS2, RefS1, RefS2
+        self.classesToClassify = []  # list with strings (names of classes), eg. ['pszenica', 'burak']
+        self.optionStratificationCounts = []  # list with ints, corresponds to optionSelectedClasses
+        # optionalClassifier:
         self.optionClassifierMaxDepth = 100
         self.optionClassifierNEstimators = 10000
         self.optionNJobs = 4
+        self.classificationName = ''
+        self.s3BucketName = ''
+        self.s3Login = ''
+        self.s3Password = ''
 
         if len(jsonFile) > 0:
             self.loadFromJSON(jsonFile)
@@ -42,6 +47,11 @@ class ConfigurationArgs:
             self.optionClassifierNEstimators = args['optionClassifierNEstimators']
             self.optionNJobs = args['optionNJobs']
             self.overwrite = args['overwrite']
+            self.classificationName = args['classificationName']
+            self.s3AccessKey = args['s3AccessKey']
+            self.s3SecretKey = args['s3SecretKey']
+            self.s3Host = args['s3Host']
+            self.s3BucketName = args['s3BucketName']
 
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__,
@@ -50,7 +60,6 @@ class ConfigurationArgs:
     def saveJSON(self, filePath='configuration.json'):
         with open(filePath, 'w') as file:
             file.write(self.toJSON())
-
 
 
 class Configuration:
@@ -68,7 +77,7 @@ class Configuration:
         self.AllS2 = True
         self.RefS1 = True
         self.RefS2 = True
-        if(len(self.confArgs.options) > 0):
+        if (len(self.confArgs.options) > 0):
             self.AllS1 = False
             self.AllS2 = False
             self.RefS1 = False
@@ -108,7 +117,18 @@ class Configuration:
         self.fMaxErrorMatrix = Path(self.statsDir, 'maxModel.xlsx')
         self.fMaxFeatures = Path(self.statsDir, 'maxFeatureIndexes.bin')
 
+        self.s3Connection = None
+        if len(self.confArgs.s3Host) > 0 and len(self.confArgs.s3BucketName) > 0 and len(self.confArgs.s3SecretKey) > 0 and len(self.confArgs.s3AccessKey) > 0:
+            self.openS3Connection()
+
         self.prepareEnv()
+
+    def trySaveFileWithS3(self, filePath):
+        if self.s3Connection is not None:
+            fileKey = Path(filePath).name
+            if len(self.confArgs.classificationName) > 0:
+                fileKey = self.confArgs.classificationName + '/' + fileKey
+            self.s3Connection.uploadFile(filePath, fileKey)
 
     def makeDirIfNotExists(self, newDirPath):
         if not os.path.exists(newDirPath):
@@ -119,6 +139,9 @@ class Configuration:
         # self.makeDirIfNotExists(self.confArgs.S2DataMainDir)
         # self.makeDirIfNotExists(self.confArgs.S1DataMainDir)
         self.makeDirIfNotExists(self.statsDir)
+
+    def openS3Connection(self):
+        self.s3Connection = S3Connector(self.confArgs.s3AccessKey, self.confArgs.s3SecretKey, self.confArgs.s3Host, self.confArgs.s3BucketName)
 
     def getS1TimesDirs(self):
         pdir = Path(self.confArgs.S1DataMainDir, 'P' + str(self.confArgs.orbitNumber), 'mozaika')
@@ -144,7 +167,7 @@ class Configuration:
                         requiredFilesFound = requiredFilesFound + 1
                 if requiredFilesFound == len(requiredFiles):
                     dir_list.append(x)
-        return dir_list#debug [1:4]
+        return dir_list  # debug [1:4]
 
     def getS2TimesDirs(self):
         pdir = Path(self.confArgs.S2DataMainDir, 'P' + str(self.confArgs.orbitNumber), 'mozaika')
@@ -171,4 +194,4 @@ class Configuration:
                         requiredFilesFound = requiredFilesFound + 1
                 if requiredFilesFound == len(requiredFiles):
                     dir_list.append(x)
-        return dir_list#debug[1:4]
+        return dir_list  # debug[1:4]
