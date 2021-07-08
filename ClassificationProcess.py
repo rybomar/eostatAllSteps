@@ -6,6 +6,14 @@ from FullImageClassification import FullImageClassification
 from IterativeFeatureReduction import IterativeFeatureReduction
 
 
+def runSystemProcess(command):
+    # if not self.outputCommandsFileHandle.closed:
+    #     self.outputCommandsFileHandle.write(command)
+    #     self.outputCommandsFileHandle.write('\n')
+    # print('\n' + command)
+    os.system(command)
+
+
 class ClassificationProcess:
     """
     Preparing, running and postprocessing of classification process.
@@ -44,26 +52,31 @@ class ClassificationProcess:
         self.features = fm.getAllFeatures()
         fm.saveFeaturesNames()
 
-    def runSystemProcess(self, command):
-        # if not self.outputCommandsFileHandle.closed:
-        #     self.outputCommandsFileHandle.write(command)
-        #     self.outputCommandsFileHandle.write('\n')
-        # print('\n' + command)
-        os.system(command)
+    @staticmethod
+    def saveTxtClassesToRaster(configuration: Configuration):
+        if configuration.confArgs.overwrite or not configuration.fResultClassesTifFile.exists():
+            command = str(configuration.prepareProgramExePath)
+            command = command + ' paint ' + str(configuration.fWorkingRasterSegmentation) \
+                      + ' ' + str(configuration.fBinCoordFilePath) \
+                      + ' ' + str(configuration.fResultClassesTxtFile) \
+                      + ' ' + str(configuration.fResultClassesTifFile)
+            runSystemProcess(command)
+            print("Classification: saving results to to file " + str(configuration.fResultClassesTifFile))
 
-    def saveClassificationToRaster(self):
-        command = str(self.configuration.prepareProgramExePath)
-        command = command + ' paint ' + str(self.configuration.fWorkingRasterSegmentation) \
-                  + ' ' + str(self.configuration.fBinCoordFilePath) \
-                  + ' ' + str(self.configuration.fResultClassesTxtFile) \
-                  + ' ' + str(self.configuration.fResultClassesTifFile)
-        self.runSystemProcess(command)
-        command = str(self.configuration.prepareProgramExePath)
-        command = command + ' paint ' + str(self.configuration.fWorkingRasterSegmentation) \
-                  + ' ' + str(self.configuration.fBinCoordFilePath) \
-                  + ' ' + str(self.configuration.fResultProbability256TxtFile) \
-                  + ' ' + str(self.configuration.fResultProbabilityTifFile)
-        print("Classification: saving results to to file " + str(self.configuration.fResultClassesTifFile))
+    @staticmethod
+    def saveTxtProbabilityToRaster(configuration: Configuration):
+        if configuration.confArgs.overwrite or not configuration.fResultProbabilityTifFile.exists():
+            command = str(configuration.prepareProgramExePath)
+            command = command + ' paint ' + str(configuration.fWorkingRasterSegmentation) \
+                      + ' ' + str(configuration.fBinCoordFilePath) \
+                      + ' ' + str(configuration.fResultProbability256TxtFile) \
+                      + ' ' + str(configuration.fResultProbabilityTifFile)
+            runSystemProcess(command)
+
+    @staticmethod
+    def saveClassificationToRaster(configuration: Configuration):
+        ClassificationProcess.saveTxtClassesToRaster(configuration)
+        ClassificationProcess.saveTxtProbabilityToRaster(configuration)
 
     def doClassificationForAllObjects(self):
         print("Classification: iterative training.")
@@ -72,4 +85,4 @@ class ClassificationProcess:
         print("Classification: full image classification.")
         fimc = FullImageClassification(self.configuration)
         fimc.Classify()
-        self.saveClassificationToRaster()
+        self.saveClassificationToRaster(self.configuration)

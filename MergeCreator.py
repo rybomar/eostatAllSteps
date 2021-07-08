@@ -4,6 +4,8 @@ from pathlib import Path
 import numpy as np
 from shutil import copyfile
 import os
+from ClassificationProcess import ClassificationProcess
+
 
 class MergeCreator:
     def __init__(self, config: Configuration):
@@ -15,6 +17,9 @@ class MergeCreator:
         self.tempProbabilityWithEmptyRasterPaths = []
         Ps = [1, 2, 3, 4, 5, 6]
         for p in Ps:
+            self.config.confArgs.orbitNumber = p
+            classprocess = ClassificationProcess(self.config)
+            classprocess.saveClassificationToRaster(self.config)  # try to convert results to to tif (sometimes it isn't done)
             clRasterPath = Path(self.config.confArgs.workingDir, 'P' + str(p), 'stats', 'resultClasses.tif')
             if clRasterPath.exists():
                 self.classificationRasterPaths.append(clRasterPath)
@@ -65,6 +70,7 @@ class MergeCreator:
 
     def calcMergeOnOverlaps(self):
         N = len(self.classificationRasterPaths)
+        Y = X = 0
         probNmatrix = []
         classNmatrix = []
 
@@ -76,7 +82,7 @@ class MergeCreator:
                 probNmatrix = np.zeros([Y, X, N], dtype=np.uint8)
             probNmatrix[:, :, n] = probData
 
-        maxInd2 = np.argmax(probNmatrix, axis=2)# which band (belt) has the hisghest value of probability
+        maxInd2 = np.argmax(probNmatrix, axis=2)  # which band (belt) has the hisghest value of probability
         I, J = np.ogrid[:Y, :X]
         winProbMatrix = probNmatrix[I, J, maxInd2]
         probNmatrix = None
