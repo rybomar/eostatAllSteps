@@ -18,17 +18,25 @@ class MergeCreator:
         Ps = [1, 2, 3, 4, 5, 6]
         for p in Ps:
             self.config.confArgs.orbitNumber = p
+            foundClassificationTif = ''
+            foundProbabilityTif = ''
             classprocess = ClassificationProcess(self.config)
             classprocess.saveClassificationToRaster(self.config)  # try to convert results to to tif (sometimes it isn't done)
             clRasterPath = Path(self.config.confArgs.workingDir, 'P' + str(p), 'stats', 'resultClasses.tif')
             if clRasterPath.exists():
-                self.classificationRasterPaths.append(clRasterPath)
+                foundClassificationTif = clRasterPath
             prRasterPath = Path(self.config.confArgs.workingDir, 'P' + str(p), 'stats', 'resultProbability.tif')
             prRasterPath256 = Path(self.config.confArgs.workingDir, 'P' + str(p), 'stats', 'probability256.tif')
             if prRasterPath.exists():
-                self.probabilityRasterPaths.append(prRasterPath)
+                foundProbabilityTif = prRasterPath
             elif prRasterPath256.exists():
-                self.probabilityRasterPaths.append(prRasterPath256)
+                foundProbabilityTif = prRasterPath256
+            if len(str(foundClassificationTif)) > 0 and len(str(foundProbabilityTif)) > 0:
+                self.classificationRasterPaths.append(foundClassificationTif)
+                self.probabilityRasterPaths.append(foundProbabilityTif)
+            else:
+                infoStr = 'No valid result in P' + str(p) + ' folder. Skipping it.'
+                print(infoStr)
 
     def createEmptyMerge(self):
         self.emptyMergePath = Path(self.config.confArgs.workingDir, 'emptyMerge.tif')
