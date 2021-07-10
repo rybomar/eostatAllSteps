@@ -57,12 +57,9 @@ class Configuration:
     def __init__(self, confFile):
         # todo: add check segmentation resolution and crop to other data if needed
         self.confArgs = ConfigurationArgs(confFile)
-        self.orbitWorkingDir = Path(self.confArgs.workingDir, 'P' + str(self.confArgs.orbitNumber))
-        self.statsDir = Path(self.orbitWorkingDir, 'stats')
         dirname = os.path.dirname(__file__)
         filename = os.path.join(dirname, 'S1prepareForClassificationP.exe')
         self.prepareProgramExePath = filename
-        self.segmentationRasterFile = self.confArgs.segmentationRasterFile
         self.overwrite = self.confArgs.overwrite
         self.AllS1 = True
         self.AllS2 = True
@@ -83,7 +80,40 @@ class Configuration:
                     self.RefS1 = True
                 if 'refs2' in lowerStr:
                     self.RefS2 = True
+        self.orbitWorkingDir = ''
+        self.statsDir = ''
+        self.segmentationRasterFile = ''
+        self.fResultClassesTxtFile = ''
+        self.fResultClassesTifFile = ''
+        self.fResultProbabilityTxtFile = ''
+        self.fResultProbabilityTifFile = ''
+        self.fResultIdTxtFile = ''
+        self.fResultProbability256TxtFile = ''
 
+        self.fWorkingTrainingPointsShapefile = ''
+        self.fWorkingRasterSegmentation = ''
+        self.fWorkingRasterTrainingPoints = ''
+        self.fOutputCommandsFilePath = ''
+        self.fBinCoordFilePath = ''
+        self.fBinRefCoordFilePath = ''
+        self.fBinAllStatsS1FilePath = ''
+        self.fBinRefStatsS1FilePath = ''
+        self.fCsvRefStatsS1FilePath = ''
+        self.fBinAllStatsS2FilePath = ''
+        self.fBinRefStatsS2FilePath = ''
+        self.fCsvRefStatsS2FilePath = ''
+
+        self.fMaxModel = ''
+        self.fMaxErrorMatrix = ''
+        self.fMaxFeatures = ''
+
+        self.generatePaths()
+        self.prepareEnv()
+
+    def generatePaths(self):
+        self.orbitWorkingDir = Path(self.confArgs.workingDir, 'P' + str(self.confArgs.orbitNumber))
+        self.statsDir = Path(self.orbitWorkingDir, 'stats')
+        self.segmentationRasterFile = self.confArgs.segmentationRasterFile
         self.fResultClassesTxtFile = Path(self.statsDir, 'resultClasses.txt')
         self.fResultClassesTifFile = Path(self.statsDir, 'resultClasses.tif')
         self.fResultProbabilityTxtFile = Path(self.statsDir, 'resultProbability.txt')
@@ -108,7 +138,6 @@ class Configuration:
         self.fMaxErrorMatrix = Path(self.statsDir, 'maxModel.xlsx')
         self.fMaxFeatures = Path(self.statsDir, 'maxFeatureIndexes.bin')
 
-        self.prepareEnv()
 
     def makeDirIfNotExists(self, newDirPath):
         if not os.path.exists(newDirPath):

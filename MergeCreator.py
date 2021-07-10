@@ -18,6 +18,7 @@ class MergeCreator:
         Ps = [1, 2, 3, 4, 5, 6]
         for p in Ps:
             self.config.confArgs.orbitNumber = p
+            self.config.generatePaths()
             foundClassificationTif = ''
             foundProbabilityTif = ''
             classprocess = ClassificationProcess(self.config)
