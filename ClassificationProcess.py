@@ -60,7 +60,7 @@ class ClassificationProcess:
                       + ' ' + str(configuration.fBinCoordFilePath) \
                       + ' ' + str(configuration.fResultClassesTxtFile) \
                       + ' ' + str(configuration.fResultClassesTifFile)
-            if Path(configuration.fWorkingRasterSegmentation).exists() and Path(configuration.fBinCoordFilePath).exist() and Path(configuration.fResultClassesTxtFile).exists():
+            if Path(configuration.fWorkingRasterSegmentation).exists() and Path(configuration.fBinCoordFilePath).exists() and Path(configuration.fResultClassesTxtFile).exists():
                 runSystemProcess(command)
                 print("Classification: saving results to to file " + str(configuration.fResultClassesTifFile))
 
@@ -72,7 +72,7 @@ class ClassificationProcess:
                       + ' ' + str(configuration.fBinCoordFilePath) \
                       + ' ' + str(configuration.fResultProbability256TxtFile) \
                       + ' ' + str(configuration.fResultProbabilityTifFile)
-            if Path(configuration.fWorkingRasterSegmentation).exists() and Path(configuration.fBinCoordFilePath).exist() and Path(configuration.fResultProbability256TxtFile).exists():
+            if Path(configuration.fWorkingRasterSegmentation).exists() and Path(configuration.fBinCoordFilePath).exists() and Path(configuration.fResultProbability256TxtFile).exists():
                 runSystemProcess(command)
 
     @staticmethod
