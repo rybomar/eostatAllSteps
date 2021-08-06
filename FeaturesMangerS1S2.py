@@ -580,6 +580,7 @@ class FeaturesMangerS1S2:
 
         if numOfAllClasses != len(maxNumberOfObjects):
             print('Reduction is not possible.')
+            print(str(numOfAllClasses) + ' != ' + str(len(maxNumberOfObjects)))
             return
         print("Class counts after reduction:")
         indexesForDelete = []
