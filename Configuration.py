@@ -123,6 +123,25 @@ class Configuration:
 
         self.prepareEnv()
 
+    # self.fBinAllStatsS1FilePath = Path(self.statsDir, 'allStatsS1.bin')
+    # self.fBinRefStatsS1FilePath = Path(self.statsDir, 'refStatsS1.bin')
+    # self.fCsvRefStatsS1FilePath = Path(self.statsDir, 'refStatsS1.csv')
+    # self.fBinAllStatsS2FilePath = Path(self.statsDir, 'allStatsS2.bin')
+    # self.fBinRefStatsS2FilePath = Path(self.statsDir, 'refStatsS2.bin')
+    # self.fCsvRefStatsS2FilePath = Path(self.statsDir, 'refStatsS2.csv')
+
+    def getStatsPath(self, all_ref, S1_S2, bin_csv, date=''):
+        name = all_ref + 'Stats' + S1_S2 + date + '.' + bin_csv
+        path = Path(self.statsDir, name)
+        return path
+
+    def getsKeyByFilePath(self, filePath):
+        fileKey = Path(filePath).name
+        # todo: roznica miedzy sciezkami self.confArgs.workingDir i filePath
+        if len(self.confArgs.classificationName) > 0:
+            fileKey = self.confArgs.classificationName + '/' + fileKey
+        return fileKey
+
     def trySaveFileWithS3(self, filePath):
         if self.s3Connection is not None:
             fileKey = Path(filePath).name
@@ -168,6 +187,15 @@ class Configuration:
                 if requiredFilesFound == len(requiredFiles):
                     dir_list.append(x)
         return dir_list  # debug [1:4]
+
+    def isKeyOfS1(self):
+        #todo check the key
+        return True
+
+    def getS1DownloadableTimeDirs(self):
+        allS3Keys = self.s3Connection.getAllKeyNames()
+
+
 
     def getS2TimesDirs(self):
         pdir = Path(self.confArgs.S2DataMainDir, 'P' + str(self.confArgs.orbitNumber), 'mozaika')

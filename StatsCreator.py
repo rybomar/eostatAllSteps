@@ -30,6 +30,9 @@ class StatsCreator:
     def doAllStatsSteps(self):
         a = 3
 
+    def getStatsPath(self, all_ref, S1_S2, bin_csv, date=''):
+        return self.conf.getStatsPath(all_ref, S1_S2, bin_csv, date)
+
     def copyShapefiles(self):
         sourceDirectory = Path(self.conf.confArgs.trainingPointsShapefile).parent.absolute()
         fileNameWithoutExt = Path(self.conf.confArgs.trainingPointsShapefile).stem
@@ -100,7 +103,20 @@ class StatsCreator:
             strList = strList + ' "' + str(d) + '"'
         return strList
 
-    def runLoadMultiTempRefS1(self):
+    def runLoadMultiTempRefS1ForOneDate(self, date):
+        csvRefStatsS1FilePath = self.getStatsPath('ref', 'S1', 'csv', date)
+        binRefStatsS1FilePath = self.getStatsPath('ref', 'S1', 'bin', date)
+        self.conf.s3Connection.downloadFile(str(self.binRefCoordFilePath), self.conf.getsKeyByFilePath(str(self.binRefCoordFilePath)))
+        command = self.conf.prepareProgramExePath
+        command = command + ' loadMultiTempRef ' + str(self.binRefCoordFilePath) + ' ' + str(
+            csvRefStatsS1FilePath) + ' ' + str(binRefStatsS1FilePath)
+        dirList = self.conf.getS1TimesDirs()
+        command = command + self.dirListToStr(dirList)
+        self.runSystemProcess(command)
+        self.conf.trySaveFileWithS3(self.binRefStatsS1FilePath)
+        self.conf.trySaveFileWithS3(self.csvRefStatsS1FilePath)
+
+    def runLoadMultiTempRefS1WithS3(self):
         command = self.conf.prepareProgramExePath
         command = command + ' loadMultiTempRef ' + str(self.binRefCoordFilePath) + ' ' + str(self.csvRefStatsS1FilePath) + ' ' + str(self.binRefStatsS1FilePath)
         dirList = self.conf.getS1TimesDirs()
@@ -184,3 +200,4 @@ class StatsCreator:
         # if self.conf.AllS2:
         #     if self.conf.overwrite or not self.binAllStatsS2FilePath.is_file():
         #         self.runLoadMultiTempS2()
+

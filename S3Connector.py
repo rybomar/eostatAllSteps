@@ -36,3 +36,9 @@ class S3Connector:
         self.uploadFile(filePath, keyFile)
         if os.path.exists(filePath):
             os.remove(filePath)
+
+    def downloadFile(self, filePath, keyFile):
+        if self.checkIsKey(keyFile):
+            if self.checkSizeOfKey(keyFile) > 8:
+                self.s3Resource.Bucket(self.s3BucketName).download_file(keyFile, filePath)
+                # todo: check

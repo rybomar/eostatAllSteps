@@ -2,7 +2,6 @@ import sys
 
 from ClassificationProcess import ClassificationProcess
 from Configuration import Configuration
-from Configuration import ConfigurationArgs
 from StatsCreator import StatsCreator
 
 
@@ -18,7 +17,7 @@ def prepareS1Stats(conf: Configuration):
 
 
 def prepareS2Stats(conf: Configuration):
-    print('prepareS1Stats')
+    print('prepareS2Stats')
     statsCreator = StatsCreator(conf)
     statsCreator.doAllS2Steps()
 

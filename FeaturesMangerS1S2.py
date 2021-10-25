@@ -96,6 +96,26 @@ class FeaturesMangerS1S2:
         # testSet = csv.reader(csvPath)
         self.prepareReadS1Data(testSet)
 
+    def readRefS1DataFromCSVs(self, csvPaths):
+        testSet= []
+        counter = 0
+        for csvPath in csvPaths:
+            if counter == 0:
+                testSet = pd.read_csv(csvPath)
+                if 'Unnamed' in testSet.columns[-1]:
+                    testSet = testSet.drop(columns=['Unnamed'])
+            else:
+                testSetOne = pd.read_csv(csvPath)
+                if 'Unnamed' in testSetOne.columns[-1]:
+                    testSetOne = testSet.drop(columns=['Unnamed'])
+                featuresColumns = testSetOne.columns[1:testSetOne.shape[1] - 1]  # todo: zmiana numerow w kolumnach, bo zawsze jest t#1, a wczytujac kolejny należy zmieniać na t#2, t#3 itd.
+                data_in_csv = testSet[featuresColumns]
+                test_set_column_count = len(testSet.columns)
+                testSet.insert(test_set_column_count-2, featuresColumns, data_in_csv, allow_duplicates=True)
+                # todo: remove 1 and last column, add to testSet - check is it work?
+            counter += 1
+        self.prepareReadS1Data(testSet)
+
     def readS1DataFromObjectList(self, objectList):
         N = len(objectList)
 

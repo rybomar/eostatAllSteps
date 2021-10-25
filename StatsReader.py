@@ -38,10 +38,10 @@ class StatsReader(object):
                         positionOnList = positionOnList + 1
                     bin4float = f.read(4)
             except:
-                a=2
+                a = 2
 
         PdHeader.append('class')
-        allObjectsMatrix = np.zeros((objectsNum, dataWidth+2))
+        allObjectsMatrix = np.zeros((objectsNum, dataWidth + 2))
         print('Found ' + str(objectsNum) + ' objects.')
         with open(binFilePath, "rb") as f:
             bin4float = f.read(4)
@@ -58,7 +58,7 @@ class StatsReader(object):
                 # ID
                 if positionOnList == 1:
                     readId = decodedValue
-                    allObjectsMatrix[index, positionOnList-1] = readId
+                    allObjectsMatrix[index, positionOnList - 1] = readId
                 # class
                 if positionOnList == 2:
                     classNumber = decodedValue
@@ -71,6 +71,20 @@ class StatsReader(object):
         df = pd.DataFrame(allObjectsMatrix, columns=PdHeader)
         print('Loaded')
         return df
+
+    def readFromManyBinFilesAsPdDataFrame(self, binFilePaths):
+        all_data_frame = []
+        loop_counter = 0
+        for bin_file_path in binFilePaths:
+            one_data_frame = self.readFromBinFileAsPdDataFrame(bin_file_path)
+            if loop_counter == 0:
+                all_data_frame = one_data_frame
+            else:
+                all_data_frame_column_count = len(all_data_frame.columns)
+                featuresColumns = one_data_frame.columns[1:one_data_frame.shape[1] - 1]
+                all_data_frame.insert(all_data_frame_column_count - 2, featuresColumns, one_data_frame, allow_duplicates=True)
+                # todo: test it!
+            loop_counter += 1
 
     def readFromBinFile(self, binFilePath):
         self.statsBinFilePath = binFilePath
@@ -100,8 +114,8 @@ class StatsReader(object):
                     countData = decodedValue
                     floatList = np.zeros(countData)
                 if positionOnList > 3:
-                    #todo: test it!
-                    #floatList.append(decodedValue)
+                    # todo: test it!
+                    # floatList.append(decodedValue)
                     index = positionOnList - 4
                     floatList[index] = decodedValue
                 if positionOnList > 3 and len(floatList) == countData:
